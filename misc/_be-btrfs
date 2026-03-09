@@ -1,0 +1,118 @@
+#compdef be-btrfs
+# be-btrfs — zsh tab-completion
+# Completes commands, flags, BE names, snapshot names, and directories.
+#
+# Install:
+#   cp _be-btrfs /usr/local/share/zsh/site-functions/_be-btrfs
+
+_be_btrfs_bes() {
+    local -a bes
+    bes=( ${(f)"$(be-btrfs list -H 2>/dev/null | cut -d';' -f1)"} )
+    _describe 'boot environment' bes
+}
+
+_be_btrfs_snaps() {
+    local -a snaps
+    snaps=( ${(f)"$(be-btrfs list -sH 2>/dev/null | awk -F';' '/^@/{print $1}')"} )
+    _describe 'snapshot' snaps
+}
+
+_be_btrfs_sources() {
+    local -a srcs
+    srcs=( ${(f)"$(be-btrfs list -sH 2>/dev/null | cut -d';' -f1)"} )
+    srcs+=( ${(f)"$(be-btrfs list -H 2>/dev/null | cut -d';' -f1)"} )
+    _describe 'source' srcs
+}
+
+_be_btrfs() {
+    local -a commands=(
+        'create:Create BE (clone of current or specified source)'
+        'destroy:Delete BE or snapshot'
+        'list:List BEs'
+        'mount:Mount a BE'
+        'unmount:Unmount a BE'
+        'rename:Rename a BE'
+        'activate:Activate BE for next boot'
+        'snapshot:Snapshot current system (read-only)'
+        'clone:Clone from external snapshot (writable BE)'
+        'shell:Chroot into BE'
+        'upgrade:Clone + apt dist-upgrade + activate'
+        'prune:Cleanup by rules from config'
+        'rescue:Activate BE from rescue media'
+        'check:Check system compatibility'
+        'status:Current state'
+        'apt-hook-install:Install APT hook'
+    )
+
+    if (( CURRENT == 2 )); then
+        _describe 'command' commands
+        return
+    fi
+
+    case "${words[2]}" in
+        create)
+            _arguments \
+                '-a[activate immediately]' \
+                '-d[description]:description:' \
+                '-e[source]:source:_be_btrfs_sources' \
+                '*:name:'
+            ;;
+        destroy|rm)
+            _arguments \
+                '-f[force unmount]' \
+                '-F[no confirmation]' \
+                '*:BE:_be_btrfs_bes'
+            ;;
+        list|ls)
+            _arguments \
+                '-a[show all]' \
+                '-d[show nested subvolumes]' \
+                '-s[show snapshots]' \
+                '-H[machine-parseable]' \
+                '*:filter:'
+            ;;
+        activate|shell|sh)
+            _arguments '*:BE:_be_btrfs_bes'
+            ;;
+        mount)
+            _arguments \
+                '1:BE:_be_btrfs_bes' \
+                '2:mountpoint:_directories'
+            ;;
+        unmount|umount)
+            _arguments \
+                '-f[force unmount]' \
+                '*:BE:_be_btrfs_bes'
+            ;;
+        rename)
+            _arguments \
+                '1:old name:_be_btrfs_bes' \
+                '2:new name:'
+            ;;
+        clone)
+            _arguments \
+                '1:source:_be_btrfs_sources' \
+                '2:name:'
+            ;;
+        upgrade)
+            _arguments \
+                '-d[description]:description:' \
+                '*:name:'
+            ;;
+        rescue)
+            _arguments '1:mountpoint:_directories'
+            ;;
+        snapshot)
+            _arguments \
+                '1:name:' \
+                '2:description:'
+            ;;
+        prune)
+            _arguments '1:count:'
+            ;;
+        check|status|apt-hook-install|help|version)
+            ;;
+    esac
+}
+
+_be_btrfs "$@"

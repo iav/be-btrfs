@@ -1,0 +1,16 @@
+// be-btrfs — APT hook template
+// Creates a snapshot before every apt install/upgrade operation.
+// @bindir@ is replaced at install time (default: /usr/local/sbin).
+//
+// Install:
+//   sed 's|@bindir@|/usr/local/sbin|g' 90-boot-environments.conf.in \
+//     > /etc/apt/apt.conf.d/90-boot-environments.conf
+// Or use: be-btrfs apt-hook-install
+
+binary::apt::AptCli::Hooks::Install {
+  "[ ! -f @bindir@/beadm ] || @bindir@/beadm apt-hook || true";
+};
+
+binary::apt::AptCli::Hooks::Upgrade {
+  "[ ! -f @bindir@/beadm ] || @bindir@/beadm apt-hook || true";
+};

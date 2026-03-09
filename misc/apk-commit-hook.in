@@ -1,0 +1,13 @@
+#!/bin/sh
+# be-btrfs — Alpine APK commit hook
+# Creates a snapshot before every apk commit (install/upgrade/delete).
+# @bindir@ is replaced at install time (default: /usr/local/sbin).
+#
+# Install:
+#   sed 's|@bindir@|/usr/local/sbin|g' apk-commit-hook.in \
+#     > /etc/apk/commit_hooks.d/be-btrfs.sh
+#   chmod +x /etc/apk/commit_hooks.d/be-btrfs.sh
+
+if [ "$1" = "pre-commit" ]; then
+    @bindir@/beadm snapshot -d 'before apk commit'
+fi
