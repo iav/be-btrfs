@@ -168,6 +168,32 @@ _make_snapshot() {
     [[ -n "$desc" ]] && meta_set "$svname" "$desc"
 }
 
+# Check fstab inside a clone for hardcoded subvol=/subvolid= on /.
+# Such entries would prevent the clone from booting correctly.
+_check_clone_fstab() {
+    local path="$1"
+    local fstab="$path/etc/fstab"
+    [[ -f "$fstab" ]] || return 0
+    local line
+    while IFS= read -r line; do
+        # Skip comments and non-root entries
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        [[ "$line" =~ [[:space:]]/[[:space:]] ]] || continue
+        if [[ "$line" =~ subvol=([^,[:space:]]+) ]]; then
+            local sv="${BASH_REMATCH[1]}"
+            [[ "$sv" == "/" ]] && continue
+            warn "clone's /etc/fstab has subvol=${sv} for / — this will prevent correct boot."
+            warn "Edit $fstab and remove the subvol= option, or use 'be-btrfs shell' to fix it."
+        fi
+        if [[ "$line" =~ subvolid=([0-9]+) ]]; then
+            local sid="${BASH_REMATCH[1]}"
+            [[ "$sid" == "0" || "$sid" == "5" ]] && continue
+            warn "clone's /etc/fstab has subvolid=${sid} for / — this will prevent correct boot."
+            warn "Edit $fstab and remove the subvolid= option, or use 'be-btrfs shell' to fix it."
+        fi
+    done < "$fstab"
+}
+
 # Create a writable clone (BE).
 # Usage: _make_clone <src_path> <bename> [desc]
 _make_clone() {
@@ -175,6 +201,7 @@ _make_clone() {
     [[ -d "$_tl/$bename" ]] && die "boot environment '${bename#${BE_PREFIX}}' already exists"
     btrfs subvolume snapshot "$src" "$_tl/$bename" >/dev/null
     meta_set "$bename" "$desc"
+    _check_clone_fstab "$_tl/$bename"
 }
 
 # Find actual mountpoint of a subvolume by its name.
