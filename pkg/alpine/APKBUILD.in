@@ -1,0 +1,24 @@
+# Maintainer: iav <iav@users.noreply.github.com>
+pkgname=be-btrfs
+pkgver=@VERSION@
+pkgrel=0
+pkgdesc="Boot Environment manager for btrfs"
+url="https://github.com/iav/be-btrfs"
+arch="noarch"
+license="GPL-3.0-or-later"
+depends="bash btrfs-progs util-linux"
+source="$pkgname-$pkgver.tar.gz"
+
+package() {
+	make install DESTDIR="$pkgdir" PREFIX=/usr CONFDIR=/etc
+	# Replace APT hook with APK commit hook on Alpine
+	rm -f "$pkgdir"/etc/apt/apt.conf.d/90-boot-environments.conf
+	rmdir -p "$pkgdir"/etc/apt/apt.conf.d 2>/dev/null || true
+	local _hookdir="$pkgdir"/etc/apk/commit_hooks.d
+	install -d "$_hookdir"
+	sed 's|@bindir@|/usr/sbin|g' misc/apk-commit-hook.in \
+	    > "$_hookdir"/be-btrfs-snapshot.sh
+	chmod 755 "$_hookdir"/be-btrfs-snapshot.sh
+}
+
+sha512sums=""

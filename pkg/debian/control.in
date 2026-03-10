@@ -1,0 +1,13 @@
+Package: be-btrfs
+Version: @VERSION@
+Architecture: @ARCH@
+Maintainer: iav <iav@users.noreply.github.com>
+Section: admin
+Priority: optional
+Depends: bash (>= 5.0), btrfs-progs (>= 6.1), util-linux
+Recommends: shellcheck
+Homepage: https://github.com/iav/be-btrfs
+Description: Boot Environment manager for btrfs
+ Solaris-style boot environments for Linux systems using btrfs.
+ Provides beadm-compatible interface: create, destroy, list,
+ mount, unmount, rename, activate.
