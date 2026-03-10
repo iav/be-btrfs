@@ -42,9 +42,15 @@ else
     _B='' _G='' _Y='' _R='' _0=''
 fi
 
-die()  { printf "${_R}error:${_0} %s\n" "$*" >&2; exit 1; }
+if command -v logger &>/dev/null; then
+    _log() { logger -t be-btrfs "$*"; }
+else
+    _log() { :; }
+fi
+
+die()  { printf "${_R}error:${_0} %s\n" "$*" >&2; _log "ERROR: $*"; exit 1; }
 warn() { printf "${_Y}warning:${_0} %s\n" "$*" >&2; }
-info() { printf "${_G}::${_0} %s\n" "$*"; }
+info() { printf "${_G}::${_0} %s\n" "$*"; _log "$*"; }
 
 # --- Common checks ---
 
