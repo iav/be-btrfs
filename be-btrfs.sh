@@ -790,6 +790,24 @@ cmd_clone() {
 
     _make_clone "$sp" "$bename" "$desc"
     info "Boot environment created: $name"
+
+    # Warn about shared nested subvolumes when cloning from external source
+    local crp
+    crp=$(current_root_path)
+    if [[ -n "$crp" ]]; then
+        local has_nested=false
+        while IFS= read -r line; do
+            local svname
+            svname=$(awk '{print $NF}' <<< "$line")
+            [[ "$svname" == "${crp}/"* ]] || continue
+            if ! $has_nested; then
+                has_nested=true
+                warn "Current root has nested subvolumes (shared, not cloned):"
+            fi
+            warn "  ${svname#${crp}/}"
+        done < <(btrfs subvolume list "$_tl")
+        $has_nested && warn "These are shared across all BEs and were NOT included in the clone."
+    fi
 }
 
 # --- Extensions ---
