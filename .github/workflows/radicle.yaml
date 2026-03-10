@@ -1,0 +1,24 @@
+name: Mirror to Radicle
+
+# Controls when the workflow will run
+on:
+  push:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - id: mirror
+        uses: gsaslis/mirror-to-radicle@v0.1.0
+        with:
+          radicle-identity-alias: "${{ secrets.RADICLE_IDENTITY_ALIAS }}"
+          radicle-identity-passphrase: "${{ secrets.RADICLE_IDENTITY_PASSPHRASE }}"
+          radicle-identity-private-key: "${{ secrets.RADICLE_IDENTITY_PRIVATE_KEY }}"
+          radicle-identity-public-key: "${{ secrets.RADICLE_IDENTITY_PUBLIC_KEY }}"
+          radicle-project-name: "${{ secrets.RADICLE_PROJECT_NAME }}"
+          radicle-repository-id: "${{ secrets.RADICLE_REPOSITORY_ID }}"
