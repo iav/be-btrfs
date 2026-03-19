@@ -275,24 +275,24 @@ _be_mount() {
     mount --bind /sys  "$mnt/sys"
     mount --bind /dev  "$mnt/dev"
     mount --bind /dev/pts "$mnt/dev/pts"
-    # Chroot needs real DNS servers, not the stub 127.0.0.53.
-    # resolv.conf in the clone may be a symlink to systemd-resolved —
-    # save the original, replace with upstream DNS file.
+    # DNS for chroot: bind-mount the host's resolv.conf so the chroot
+    # uses the same resolver (incl. systemd-resolved stub with its cache
+    # and Happy Eyeballs for fast IPv4/IPv6 selection).
     _be_resolv_backup=""
     if [[ -L "$mnt/etc/resolv.conf" ]]; then
         _be_resolv_backup=$(readlink "$mnt/etc/resolv.conf")
         rm -f "$mnt/etc/resolv.conf"
+        touch "$mnt/etc/resolv.conf"
+    elif [[ ! -f "$mnt/etc/resolv.conf" ]]; then
+        touch "$mnt/etc/resolv.conf"
     fi
-    if [[ -f /run/systemd/resolve/resolv.conf ]]; then
-        cp /run/systemd/resolve/resolv.conf "$mnt/etc/resolv.conf" 2>/dev/null || true
-    elif [[ -f /etc/resolv.conf ]]; then
-        cp --dereference /etc/resolv.conf "$mnt/etc/resolv.conf" 2>/dev/null || true
-    fi
+    mount --bind /etc/resolv.conf "$mnt/etc/resolv.conf"
 }
 
 _be_umount() {
     local mnt="$1"
-    # Restore original resolv.conf (symlink to systemd-resolved)
+    # Unmount resolv.conf bind-mount and restore original symlink
+    umount "$mnt/etc/resolv.conf" 2>/dev/null || true
     if [[ -n "${_be_resolv_backup:-}" ]]; then
         rm -f "$mnt/etc/resolv.conf"
         ln -s "$_be_resolv_backup" "$mnt/etc/resolv.conf"
