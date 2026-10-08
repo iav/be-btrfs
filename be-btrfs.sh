@@ -9,7 +9,7 @@
 set -euo pipefail
 
 readonly PROG="${0##*/}"
-readonly VERSION="0.4.0"
+readonly VERSION="0.4.1"
 
 # --- Defaults (overridden by config) ---
 
@@ -857,19 +857,32 @@ cmd_status() {
         | awk -v id="$did" '$2==id {print $NF}')"
 }
 
-# shell <name> — chroot into BE (mount + chroot + unmount)
+# shell <name> [-- cmd [args...]] — chroot into BE: interactive bash,
+# or run one command and return its exit code
 cmd_shell() {
+    local name="${1:?specify BE name}"; shift
+    local -a run_cmd=()
+    if [[ $# -gt 0 ]]; then
+        [[ "$1" == "--" ]] || die "unexpected argument: $1 (put -- before the command)"
+        shift
+        [[ $# -gt 0 ]] || die "no command after --"
+        run_cmd=("$@")
+    fi
+
     need_root; need_btrfs; mount_toplevel
 
-    local name="$1"
     local bename="${BE_PREFIX}${name}"
     [[ -d "$_tl/$bename" ]] || die "boot environment '$name' not found"
 
     _shell_inner() {
         local mnt="$1"
-        info "Entering '$name'. Type 'exit' to leave."
-        chroot "$mnt" /bin/bash || true
-        info "Leaving '$name'."
+        if [[ ${#run_cmd[@]} -gt 0 ]]; then
+            chroot "$mnt" "${run_cmd[@]}"
+        else
+            info "Entering '$name'. Type 'exit' to leave."
+            chroot "$mnt" /bin/bash || true
+            info "Leaving '$name'."
+        fi
     }
 
     _with_mounted_be "$bename" _shell_inner
@@ -1136,7 +1149,8 @@ Commands:
 Additional commands:
   snapshot [name] [description] Snapshot current system (read-only)
   clone <source> [name]         Clone from external snapshot (writable BE)
-  shell <name>                  Chroot into BE (mount + shell + unmount)
+  shell <name> [-- cmd [args]]  Chroot into BE: interactive shell, or run cmd
+                                and return its exit code
   upgrade [-d desc] [name]      Clone + apt dist-upgrade + activate
   prune                         Cleanup by rules from config
   prune N                       Keep N newest BEs (legacy)
@@ -1170,7 +1184,7 @@ main() {
         rename)             cmd_rename "$@" ;;
         snapshot|snap)      cmd_snapshot "${1:-}" "${2:-}" ;;
         clone)              cmd_clone "$@" ;;
-        shell|sh)           cmd_shell "${1:?specify BE name}" ;;
+        shell|sh)           cmd_shell "$@" ;;
         upgrade)            cmd_upgrade "$@" ;;
         prune)              cmd_prune "${1:-}" ;;
         rescue)             cmd_rescue "${1:?specify mountpoint}" ;;

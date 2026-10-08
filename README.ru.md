@@ -179,6 +179,12 @@ sudo be-btrfs shell myBE
 exit
 ```
 
+С `--` вместо оболочки выполняется одна команда, и be-btrfs завершается с её кодом возврата — годится для скриптов и ssh без tty:
+
+```bash
+sudo be-btrfs shell myBE -- dpkg -i /root/linux-image-6.18.0_arm64.deb
+```
+
 #### prune — очистка старых BE и снапшотов
 
 ```bash

@@ -179,6 +179,12 @@ sudo be-btrfs shell myBE
 exit
 ```
 
+With `--`, runs one command in the chroot instead of a shell and exits with its exit code — usable from scripts and over ssh without a tty:
+
+```bash
+sudo be-btrfs shell myBE -- dpkg -i /root/linux-image-6.18.0_arm64.deb
+```
+
 #### prune — clean up old BEs and snapshots
 
 ```bash
