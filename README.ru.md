@@ -210,8 +210,10 @@ sudo be-btrfs status                   # текущий корень и default 
 
 ```bash
 sudo be-btrfs apt-hook-install         # установить хук
-# Теперь при каждом apt install/upgrade автоматически создаётся снапшот
+# Теперь при каждом apt install/upgrade/remove автоматически создаётся снапшот
 ```
+
+Пакет `.deb` ставит хук сам. И пакет, и команда пишут `/etc/apt/apt.conf.d/90-boot-environments.conf`; чтобы отключить хук, удалите этот файл. На Alpine пакет `.apk` ставит такой же хук для apk: `/etc/apk/commit_hooks.d/be-btrfs-snapshot.sh`.
 
 ## Сводка опций
 

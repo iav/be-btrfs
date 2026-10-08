@@ -23,6 +23,7 @@ install:
 	install -d $(DESTDIR)$(CONFDIR)/apt/apt.conf.d
 	sed 's|@bindir@|$(SBINDIR)|g' misc/90-boot-environments.conf.in \
 	    > $(DESTDIR)$(CONFDIR)/apt/apt.conf.d/90-boot-environments.conf
+	chmod 644 $(DESTDIR)$(CONFDIR)/apt/apt.conf.d/90-boot-environments.conf
 
 uninstall:
 	rm -f $(DESTDIR)$(SBINDIR)/be-btrfs

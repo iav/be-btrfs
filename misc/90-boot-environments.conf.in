@@ -1,16 +1,5 @@
-// be-btrfs — APT hook template
-// Creates a snapshot before every apt install/upgrade operation.
-// @bindir@ is replaced at install time (default: /usr/local/sbin).
-//
-// Install:
-//   sed 's|@bindir@|/usr/local/sbin|g' 90-boot-environments.conf.in \
-//     > /etc/apt/apt.conf.d/90-boot-environments.conf
-// Or use: be-btrfs apt-hook-install
+// be-btrfs — APT hook
+// Snapshots the system before apt runs dpkg (install, upgrade, remove).
+// To disable, delete this file: dpkg keeps a deleted conffile deleted.
 
-binary::apt::AptCli::Hooks::Install {
-  "[ ! -f @bindir@/beadm ] || @bindir@/beadm apt-hook || true";
-};
-
-binary::apt::AptCli::Hooks::Upgrade {
-  "[ ! -f @bindir@/beadm ] || @bindir@/beadm apt-hook || true";
-};
+DPkg::Pre-Invoke { "@bindir@/be-btrfs apt-pre-hook 2>/dev/null || true"; };

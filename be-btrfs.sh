@@ -9,7 +9,7 @@
 set -euo pipefail
 
 readonly PROG="${0##*/}"
-readonly VERSION="0.4.1"
+readonly VERSION="0.4.2"
 
 # --- Defaults (overridden by config) ---
 
@@ -1109,12 +1109,22 @@ cmd_rescue() {
 
 # --- APT hook ---
 
+# Same file and content as misc/90-boot-environments.conf.in, so a
+# packaged install and this command never leave two hooks.
 cmd_apt_hook_install() {
     need_root
-    cat > /etc/apt/apt.conf.d/80-be-snapshot << 'HOOK'
-DPkg::Pre-Invoke { "/usr/local/sbin/be-btrfs apt-pre-hook 2>/dev/null || true"; };
+    local self hook=/etc/apt/apt.conf.d/90-boot-environments.conf
+    self=$(readlink -f "$0")
+    cat > "$hook" << HOOK
+// be-btrfs — APT hook
+// Snapshots the system before apt runs dpkg (install, upgrade, remove).
+// To disable, delete this file: dpkg keeps a deleted conffile deleted.
+
+DPkg::Pre-Invoke { "${self} apt-pre-hook 2>/dev/null || true"; };
 HOOK
-    info "APT hook installed."
+    chmod 644 "$hook"
+    rm -f /etc/apt/apt.conf.d/80-be-snapshot
+    info "APT hook installed: $hook"
 }
 
 cmd_apt_pre_hook() {

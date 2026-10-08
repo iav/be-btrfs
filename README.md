@@ -210,8 +210,10 @@ sudo be-btrfs status                   # current root and default subvolume
 
 ```bash
 sudo be-btrfs apt-hook-install         # install the hook
-# Now every apt install/upgrade automatically creates a snapshot
+# Now every apt install/upgrade/remove automatically creates a snapshot
 ```
+
+The `.deb` package installs the hook itself. Both write `/etc/apt/apt.conf.d/90-boot-environments.conf`; delete that file to disable the hook. On Alpine the `.apk` package installs an apk commit hook with the same purpose: `/etc/apk/commit_hooks.d/be-btrfs-snapshot.sh`.
 
 ## Options Summary
 
