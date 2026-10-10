@@ -1,10 +1,5 @@
 # be-btrfs — fish tab-completion
 # Completes commands, flags, BE names, snapshot names, and directories.
-#
-# Install (per-user):
-#   cp be-btrfs.fish ~/.config/fish/completions/be-btrfs.fish
-# Install (system-wide):
-#   cp be-btrfs.fish /etc/fish/completions/be-btrfs.fish
 
 function __be_btrfs_bes
     be-btrfs list -H 2>/dev/null | string split ';' -f1

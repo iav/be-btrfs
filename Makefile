@@ -15,7 +15,7 @@ install:
 	install -Dm755 be-btrfs.sh    $(DESTDIR)$(SBINDIR)/be-btrfs
 	install -Dm644 be-btrfs.conf  $(DESTDIR)$(CONFDIR)/be-btrfs.conf
 	install -Dm644 misc/be-btrfs-completion.bash \
-	    $(DESTDIR)$(CONFDIR)/bash_completion.d/be-btrfs
+	    $(DESTDIR)$(PREFIX)/share/bash-completion/completions/be-btrfs
 	install -Dm644 misc/_be-btrfs \
 	    $(DESTDIR)$(PREFIX)/share/zsh/vendor-completions/_be-btrfs
 	install -Dm644 misc/be-btrfs.fish \
@@ -28,7 +28,7 @@ install:
 uninstall:
 	rm -f $(DESTDIR)$(SBINDIR)/be-btrfs
 	rm -f $(DESTDIR)$(CONFDIR)/be-btrfs.conf
-	rm -f $(DESTDIR)$(CONFDIR)/bash_completion.d/be-btrfs
+	rm -f $(DESTDIR)$(PREFIX)/share/bash-completion/completions/be-btrfs
 	rm -f $(DESTDIR)$(PREFIX)/share/zsh/vendor-completions/_be-btrfs
 	rm -f $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d/be-btrfs.fish
 	rm -f $(DESTDIR)$(CONFDIR)/apt/apt.conf.d/90-boot-environments.conf

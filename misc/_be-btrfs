@@ -1,9 +1,6 @@
 #compdef be-btrfs
 # be-btrfs — zsh tab-completion
 # Completes commands, flags, BE names, snapshot names, and directories.
-#
-# Install:
-#   cp _be-btrfs /usr/local/share/zsh/site-functions/_be-btrfs
 
 _be_btrfs_bes() {
     local -a bes

@@ -1,8 +1,5 @@
 # be-btrfs — bash tab-completion
 # Completes commands, flags, BE names, snapshot names, and directories.
-#
-# Install:
-#   cp be-btrfs-completion.bash /etc/bash_completion.d/be-btrfs
 
 _be_btrfs_list_bes() {
     local bes
