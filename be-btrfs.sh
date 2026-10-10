@@ -9,7 +9,7 @@
 set -euo pipefail
 
 readonly PROG="${0##*/}"
-readonly VERSION="0.4.2"
+readonly VERSION="0.4.3"
 
 # --- Defaults (overridden by config) ---
 
