@@ -1127,7 +1127,18 @@ HOOK
     info "APT hook installed: $hook"
 }
 
+# True unless / is the root of PID 1, as ischroot(1); without /proc we
+# cannot tell and assume a chroot.
+_in_chroot() {
+    local self init
+    self=$(stat -c %d:%i / 2>/dev/null) || return 0
+    init=$(stat -Lc %d:%i /proc/1/root 2>/dev/null) || return 0
+    [[ "$self" != "$init" ]]
+}
+
 cmd_apt_pre_hook() {
+    # apt in a chroot leaves the running system as it is: nothing to snapshot.
+    _in_chroot && return 0
     need_btrfs
     mount_toplevel
     local name="apt-$(timestamp)"
